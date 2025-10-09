@@ -19,3 +19,7 @@ rsync -avz /home/fish/Software/Development/github/Home-Assistant/docker-voltroni
 ```
 docker exec -it voltronic-mqtt /opt/inverter-cli/bin/inverter_poller -d -1
 ```
+
+```
+https://raw.githubusercontent.com/svalouch/python-rctclient/master/rctclient/client.py
+```
