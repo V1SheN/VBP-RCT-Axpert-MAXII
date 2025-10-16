@@ -64,12 +64,39 @@ func (ic *InverterCommunicator) SendCommand(command string) (string, error) {
 		return "", fmt.Errorf("device not open")
 	}
 
-	// --- Pre-read Flush (Best Effort) ---
-	// Attempt to clear any lingering data before sending the actual command.
-	// This uses a short read deadline to prevent blocking indefinitely.
-	_ = ic.deviceFile.SetReadDeadline(time.Now().Add(50 * time.Millisecond))
-	_, _ = ic.deviceFile.Read(make([]byte, bufferSize)) // Read and discard
-	_ = ic.deviceFile.SetReadDeadline(time.Time{})      // Clear the deadline
+	// --- Pre-read Flush (Aggressive Best Effort) ---
+	// Repeatedly read and discard any lingering data until no more is found,
+	// or a short overall flush timeout is reached.
+	flushBuf := make([]byte, bufferSize)
+	flushStartTime := time.Now()
+	flushedBytes := 0 // Add counter
+	for {
+		if time.Since(flushStartTime) > 200*time.Millisecond { // Overall flush timeout
+			fmt.Printf("Communicator: Pre-read flush timeout reached after %dms, %d bytes flushed.\n", time.Since(flushStartTime).Milliseconds(), flushedBytes)
+			break
+		}
+		_ = ic.deviceFile.SetReadDeadline(time.Now().Add(20 * time.Millisecond)) // Short deadline for each read
+		n, err := ic.deviceFile.Read(flushBuf)
+		_ = ic.deviceFile.SetReadDeadline(time.Time{})      // Clear the deadline
+
+		if err != nil {
+			// If it's a timeout error, assume buffer is clear
+			if os.IsTimeout(err) {
+				fmt.Printf("Communicator: Pre-read flush completed (read timeout). %d bytes flushed.\n", flushedBytes)
+				break
+			}
+			// Other errors, just break
+			fmt.Printf("Communicator: Error during pre-read flush: %v. %d bytes flushed.\n", err, flushedBytes)
+			break
+		}
+		if n == 0 {
+			// No data read, assume buffer is clear
+			fmt.Printf("Communicator: Pre-read flush completed (no data). %d bytes flushed.\n", flushedBytes)
+			break
+		}
+		flushedBytes += n // Increment counter
+		// Data was read, continue flushing
+	}
 
 	// Commands need to be terminated with CRC and a carriage return (CR)
 	cmdWithCRC := []byte(command)
