@@ -5,8 +5,8 @@ set -e
 
 # Define variables
 IMAGE_NAME="go-inverter-cli"
-DEVICE_PATH="/dev/hidraw4"
-MQTT_CONFIG_HOST_PATH="/home/fish/Software/Development/github/Home-Assistant/docker-voltronic-homeassistant-master/config/mqtt.json"
+DEVICE_PATH="/dev/hidraw5"
+MQTT_CONFIG_HOST_PATH="./mqtt.json"
 MQTT_CONFIG_CONTAINER_PATH="/app/mqtt.json"
 POLLING_INTERVAL="5s"
 PLATFORM="linux/386"
@@ -19,5 +19,5 @@ echo "--- Building Docker image: $IMAGE_NAME for platform $PLATFORM ---"
 docker build --platform "$PLATFORM" -t "$IMAGE_NAME" .
 
 echo "--- Running Docker container: $IMAGE_NAME ---"
-docker run --rm -i --platform "$PLATFORM" --device="$DEVICE_PATH" \
-  "$IMAGE_NAME" -device "$DEVICE_PATH" -interval "$POLLING_INTERVAL"
+docker run --rm --platform "$PLATFORM" --device="$DEVICE_PATH" \
+  "$IMAGE_NAME" -device "$DEVICE_PATH" -interval "$POLLING_INTERVAL" -debug

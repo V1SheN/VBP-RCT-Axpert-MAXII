@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	bufferSize = 256 // Increased buffer size to accommodate longer responses
+	// devicePath = "/dev/hidraw4" // This will eventually come from config
+	bufferSize = 64 // Typical HID report size
 )
 
 // InverterCommunicator handles low-level communication with the inverter device.
@@ -64,13 +65,6 @@ func (ic *InverterCommunicator) SendCommand(command string) (string, error) {
 		return "", fmt.Errorf("device not open")
 	}
 
-	// --- Pre-read Flush (Best Effort) ---
-	// Attempt to clear any lingering data before sending the actual command.
-	// This uses a short read deadline to prevent blocking indefinitely.
-	_ = ic.deviceFile.SetReadDeadline(time.Now().Add(50 * time.Millisecond))
-	_, _ = ic.deviceFile.Read(make([]byte, bufferSize)) // Read and discard
-	_ = ic.deviceFile.SetReadDeadline(time.Time{})      // Clear the deadline
-
 	// Commands need to be terminated with CRC and a carriage return (CR)
 	cmdWithCRC := []byte(command)
 	crc := calculateCRC(cmdWithCRC)
@@ -119,7 +113,7 @@ func (ic *InverterCommunicator) SendCommand(command string) (string, error) {
 			}
 
 				responseWithoutCR := fullResponseWithCR[:len(fullResponseWithCR)-1]
-			receivedCRC := responseWithoutCR[len(responseWithoutCR)-2:]
+				receivedCRC := responseWithoutCR[len(responseWithoutCR)-2:]
 				dataPart := responseWithoutCR[:len(responseWithoutCR)-2]
 				calculatedCRC := calculateCRC(dataPart)
 
@@ -134,6 +128,6 @@ func (ic *InverterCommunicator) SendCommand(command string) (string, error) {
 			}
 		}
 		// Prevent busy-waiting if device is slow or sends partial responses
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }

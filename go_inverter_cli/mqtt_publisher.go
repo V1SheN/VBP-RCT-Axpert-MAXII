@@ -71,8 +71,8 @@ func (mp *MQTTPublisher) Disconnect() {
 	}
 }
 
-// PublishData publishes structured data to the configured MQTT topic.
-func (mp *MQTTPublisher) PublishData(data interface{}) error {
+// PublishData publishes structured data to a specific sub-topic.
+func (mp *MQTTPublisher) PublishData(data interface{}, subTopic string) error {
 	if mp.client == nil || !mp.client.IsConnected() {
 		return fmt.Errorf("not connected to MQTT broker")
 	}
@@ -82,13 +82,13 @@ func (mp *MQTTPublisher) PublishData(data interface{}) error {
 		return fmt.Errorf("failed to marshal data to JSON: %w", err)
 	}
 
-	topic := fmt.Sprintf("%s/%s/state", mp.config.Topic, mp.config.DeviceName)
+	topic := fmt.Sprintf("%s/%s/%s", mp.config.Topic, mp.config.DeviceName, subTopic)
 	token := mp.client.Publish(topic, 1, false, payload)
 	token.Wait()
 	if token.Error() != nil {
 		return fmt.Errorf("failed to publish message: %w", token.Error())
 	}
 
-	fmt.Printf("Published to topic %s: %s\n", topic, payload)
+	fmt.Printf("Published to topic %s: %s", topic, payload)
 	return nil
 }

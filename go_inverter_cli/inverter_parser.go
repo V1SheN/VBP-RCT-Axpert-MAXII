@@ -90,9 +90,9 @@ func (ip *InverterParser) ParseQPIGSResponse(rawResponse string) (*QPIGSData, er
 	// This is a simplified parsing and needs to be robustified.
 	// Example raw data: (229.8 49.8 229.8 49.8 0781 0583 009 396 00.00 000 000 0034 00.0 000.0 00.00 00000 00010000 00 00 00000 010
 
-	if len(parts) < 21 { // Minimum expected fields
-		return nil, fmt.Errorf("QPIGS response has too few fields: %d", len(parts))
-	}
+	// if len(parts) < 21 { // Minimum expected fields
+	// 	return nil, fmt.Errorf("QPIGS response has too few fields: %d", len(parts))
+	// }
 
 	data := &QPIGSData{}
 	var err error
@@ -241,9 +241,9 @@ func (ip *InverterParser) ParseQPIRIResponse(rawResponse string) (*QPIRIData, er
 	cleanedResponse = strings.TrimSuffix(cleanedResponse, "\r")
 	parts := strings.Fields(cleanedResponse)
 
-	if len(parts) < 28 { // Based on data_format.md
-		return nil, fmt.Errorf("QPIRI response has too few fields: %d", len(parts))
-	}
+	// if len(parts) < 28 { // Based on data_format.md
+	// 	return nil, fmt.Errorf("QPIRI response has too few fields: %d", len(parts))
+	// }
 
 	data := &QPIRIData{}
 	var err error
@@ -308,3 +308,87 @@ func (ip *InverterParser) ParseQPIRIResponse(rawResponse string) (*QPIRIData, er
 
 	return data, nil
 }
+
+// QMODData holds the parsed data from the QMOD command.
+type QMODData struct {
+	DeviceMode string
+}
+
+// ParseQMODResponse parses the raw string response from the QMOD command.
+func (ip *InverterParser) ParseQMODResponse(rawResponse string) (*QMODData, error) {
+	cleanedResponse := strings.TrimPrefix(rawResponse, "(")
+	cleanedResponse = strings.TrimSuffix(cleanedResponse, "\r")
+
+	if len(cleanedResponse) == 0 {
+		return nil, fmt.Errorf("QMOD response is empty")
+	}
+
+	data := &QMODData{
+		DeviceMode: cleanedResponse,
+	}
+
+	return data, nil
+}
+
+// QDIData holds the parsed data from the QDI command.
+type QDIData struct {
+	ACOutputVoltage         float64
+	ACOutputFrequency       float64
+	MaxACChargingCurrent    int
+	BatteryUnderVoltage     float64
+	BatteryFloatVoltage     float64
+	BatteryBulkVoltage      float64
+	BatteryRechargeVoltage  float64
+	MaxChargingCurrent      int
+	InputVoltageRange       int
+	OutputSourcePriority    int
+	ChargerSourcePriority   int
+	BatteryType             int
+	BatteryRedischargeVoltage float64
+	MachineType             string
+}
+
+// ParseQDIResponse parses the raw string response from the QDI command.
+func (ip *InverterParser) ParseQDIResponse(rawResponse string) (*QDIData, error) {
+	cleanedResponse := strings.TrimPrefix(rawResponse, "(")
+	cleanedResponse = strings.TrimSuffix(cleanedResponse, "\r")
+	parts := strings.Fields(cleanedResponse)
+
+	if len(parts) < 25 { // Number of fields from protocol doc, adjust as needed
+		return nil, fmt.Errorf("QDI response has too few fields: %d", len(parts))
+	}
+
+	data := &QDIData{}
+	var err error
+
+	data.ACOutputVoltage, err = strconv.ParseFloat(parts[0], 64)
+	if err != nil { return nil, fmt.Errorf("error parsing QDI ACOutputVoltage: %w", err) }
+	data.ACOutputFrequency, err = strconv.ParseFloat(parts[1], 64)
+	if err != nil { return nil, fmt.Errorf("error parsing QDI ACOutputFrequency: %w", err) }
+	data.MaxACChargingCurrent, err = strconv.Atoi(parts[2])
+	if err != nil { return nil, fmt.Errorf("error parsing QDI MaxACChargingCurrent: %w", err) }
+	data.BatteryUnderVoltage, err = strconv.ParseFloat(parts[3], 64)
+	if err != nil { return nil, fmt.Errorf("error parsing QDI BatteryUnderVoltage: %w", err) }
+	data.BatteryFloatVoltage, err = strconv.ParseFloat(parts[4], 64)
+	if err != nil { return nil, fmt.Errorf("error parsing QDI BatteryFloatVoltage: %w", err) }
+	data.BatteryBulkVoltage, err = strconv.ParseFloat(parts[5], 64)
+	if err != nil { return nil, fmt.Errorf("error parsing QDI BatteryBulkVoltage: %w", err) }
+	data.BatteryRechargeVoltage, err = strconv.ParseFloat(parts[6], 64)
+	if err != nil { return nil, fmt.Errorf("error parsing QDI BatteryRechargeVoltage: %w", err) }
+	data.MaxChargingCurrent, err = strconv.Atoi(parts[7])
+	if err != nil { return nil, fmt.Errorf("error parsing QDI MaxChargingCurrent: %w", err) }
+	data.InputVoltageRange, err = strconv.Atoi(parts[8])
+	if err != nil { return nil, fmt.Errorf("error parsing QDI InputVoltageRange: %w", err) }
+	data.OutputSourcePriority, err = strconv.Atoi(parts[9])
+	if err != nil { return nil, fmt.Errorf("error parsing QDI OutputSourcePriority: %w", err) }
+	data.ChargerSourcePriority, err = strconv.Atoi(parts[10])
+	if err != nil { return nil, fmt.Errorf("error parsing QDI ChargerSourcePriority: %w", err) }
+	data.BatteryType, err = strconv.Atoi(parts[11])
+	if err != nil { return nil, fmt.Errorf("error parsing QDI BatteryType: %w", err) }
+	data.BatteryRedischargeVoltage, err = strconv.ParseFloat(parts[22], 64)
+	if err != nil { return nil, fmt.Errorf("error parsing QDI BatteryRedischargeVoltage: %w", err) }
+	data.MachineType = parts[24]
+
+	return data, nil
+}
+
