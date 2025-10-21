@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -98,10 +99,15 @@ func main() {
 				if err != nil {
 					fmt.Printf("Error parsing QPIGS response: %v\n", err)
 				} else {
-					fmt.Printf("Parsed QPIGS Data: %+v\n", qpigSData)
-					err = publisher.PublishData(qpigSData, "state")
+					jsonData, err := json.MarshalIndent(qpigSData, "", "  ")
 					if err != nil {
-						fmt.Printf("Error publishing QPIGS data to MQTT: %v\n", err)
+						fmt.Printf("Error marshaling QPIGS data to JSON: %v\n", err)
+					} else {
+						fmt.Printf("Parsed QPIGS Data (JSON): %s\n", jsonData)
+						err = publisher.PublishData(qpigSData, "state")
+						if err != nil {
+							fmt.Printf("Error publishing QPIGS data to MQTT: %v\n", err)
+						}
 					}
 				}
 			}
@@ -128,10 +134,15 @@ func main() {
 				if err != nil {
 					fmt.Printf("Error parsing QPIRI response: %v\n", err)
 				} else {
-					fmt.Printf("Parsed QPIRI Data: %+v\n", qpiriData)
-					err = publisher.PublishData(qpiriData, "rating")
+					jsonData, err := json.MarshalIndent(qpiriData, "", "  ")
 					if err != nil {
-						fmt.Printf("Error publishing QPIRI data to MQTT: %v\n", err)
+						fmt.Printf("Error marshaling QPIRI data to JSON: %v\n", err)
+					} else {
+						fmt.Printf("Parsed QPIRI Data (JSON): %s\n", jsonData)
+						err = publisher.PublishData(qpiriData, "rating")
+						if err != nil {
+							fmt.Printf("Error publishing QPIRI data to MQTT: %v\n", err)
+						}
 					}
 				}
 			}
@@ -158,10 +169,15 @@ func main() {
 						if err != nil {
 							fmt.Printf("Error parsing QPIGS2 response: %v\n", err)
 						} else {
-							fmt.Printf("Parsed QPIGS2 Data: %+v\n", qpigs2Data)
-							err = publisher.PublishData(qpigs2Data, "pv2")
+							jsonData, err := json.MarshalIndent(qpigs2Data, "", "  ")
 							if err != nil {
-								fmt.Printf("Error publishing QPIGS2 data to MQTT: %v\n", err)
+								fmt.Printf("Error marshaling QPIGS2 data to JSON: %v\n", err)
+							} else {
+								fmt.Printf("Parsed QPIGS2 Data (JSON): %s\n", jsonData)
+								err = publisher.PublishData(qpigs2Data, "pv2")
+								if err != nil {
+									fmt.Printf("Error publishing QPIGS2 data to MQTT: %v\n", err)
+								}
 							}
 						}
 					}
@@ -187,10 +203,15 @@ func main() {
 				if err != nil {
 					fmt.Printf("Error parsing QPIWS response: %v\n", err)
 				} else {
-					fmt.Printf("Parsed QPIWS Data: %+v\n", qpiwsData)
-					err = publisher.PublishData(qpiwsData, "warnings")
+					jsonData, err := json.MarshalIndent(qpiwsData, "", "  ")
 					if err != nil {
-						fmt.Printf("Error publishing QPIWS data to MQTT: %v\n", err)
+						fmt.Printf("Error marshaling QPIWS data to JSON: %v\n", err)
+					} else {
+						fmt.Printf("Parsed QPIWS Data (JSON): %s\n", jsonData)
+						err = publisher.PublishData(qpiwsData, "warnings")
+						if err != nil {
+							fmt.Printf("Error publishing QPIWS data to MQTT: %v\n", err)
+						}
 					}
 				}
 			}
@@ -219,10 +240,15 @@ func main() {
 					if err != nil {
 						fmt.Printf("Error parsing QMOD response: %v\n", err)
 					} else {
-						fmt.Printf("Parsed QMOD Data: %+v\n", qmodData)
-						err = publisher.PublishData(qmodData, "debug/qmod")
+						jsonData, err := json.MarshalIndent(qmodData, "", "  ")
 						if err != nil {
-							fmt.Printf("Error publishing QMOD data to MQTT: %v\n", err)
+							fmt.Printf("Error marshaling QMOD data to JSON: %v\n", err)
+						} else {
+							fmt.Printf("Parsed QMOD Data (JSON): %s\n", jsonData)
+							err = publisher.PublishData(qmodData, "debug/qmod")
+							if err != nil {
+								fmt.Printf("Error publishing QMOD data to MQTT: %v\n", err)
+							}
 						}
 					}
 				}
@@ -249,10 +275,15 @@ func main() {
 					if err != nil {
 						fmt.Printf("Error parsing QDI response: %v\n", err)
 					} else {
-						fmt.Printf("Parsed QDI Data: %+v\n", qdiData)
-						err = publisher.PublishData(qdiData, "debug/qdi")
+						jsonData, err := json.MarshalIndent(qdiData, "", "  ")
 						if err != nil {
-							fmt.Printf("Error publishing QDI data to MQTT: %v\n", err)
+							fmt.Printf("Error marshaling QDI data to JSON: %v\n", err)
+						} else {
+							fmt.Printf("Parsed QDI Data (JSON): %s\n", jsonData)
+							err = publisher.PublishData(qdiData, "debug/qdi")
+							if err != nil {
+								fmt.Printf("Error publishing QDI data to MQTT: %v\n", err)
+							}
 						}
 					}
 				}

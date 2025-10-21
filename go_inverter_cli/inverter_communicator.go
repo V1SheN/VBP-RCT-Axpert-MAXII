@@ -82,7 +82,7 @@ func (ic *InverterCommunicator) SendCommand(command string) (string, error) {
 		if err != nil {
 			// If it's a timeout error, assume buffer is clear
 			if os.IsTimeout(err) {
-				fmt.Printf("Communicator: Pre-read flush completed (read timeout). %d bytes flushed.\n", flushedBytes)
+				fmt.Printf("	Communicator: Pre-read flush completed (read timeout). %d bytes flushed.\n", flushedBytes)
 				break
 			}
 			// Other errors, just break
@@ -105,13 +105,13 @@ func (ic *InverterCommunicator) SendCommand(command string) (string, error) {
 	cmdBytes = append(cmdBytes, '\r')
 
 	// Write the command
-	fmt.Printf("Communicator: Sending command '%s' (bytes: %x)\n", command, cmdBytes)
+	fmt.Printf("	Communicator: Sending command '%s' (bytes: %x)\n", command, cmdBytes)
 	_, err := ic.deviceFile.Write(cmdBytes)
 	if err != nil {
 		return "", fmt.Errorf("error writing command to device: %w", err)
 	}
 
-	fmt.Println("Communicator: Command sent. Waiting for response...")
+	fmt.Println("	Communicator: Command sent. Waiting for response...")
 	responseBuffer := make([]byte, bufferSize)
 	var response []byte
 
@@ -133,9 +133,9 @@ func (ic *InverterCommunicator) SendCommand(command string) (string, error) {
 		}
 
 		if n > 0 {
-			fmt.Printf("Communicator: Read %d bytes: %x\n", n, responseBuffer[:n])
+			// fmt.Printf("Communicator: Read %d bytes: %x\n", n, responseBuffer[:n])
 			response = append(response, responseBuffer[:n]...)
-			fmt.Printf("Communicator: Current response buffer (hex): %x, length: %d\n", response, len(response))
+			// fmt.Printf("Communicator: Current response buffer (hex): %x, length: %d\n", response, len(response))
 
 			crIndex := bytes.IndexByte(response, '\r')
 			if crIndex != -1 { // If CR is found

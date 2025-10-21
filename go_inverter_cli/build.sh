@@ -19,5 +19,5 @@ echo "--- Building Docker image: $IMAGE_NAME for platform $PLATFORM ---"
 docker build --platform "$PLATFORM" -t "$IMAGE_NAME" .
 
 echo "--- Running Docker container: $IMAGE_NAME ---"
-docker run --rm --platform "$PLATFORM" --device="$DEVICE_PATH" \
+docker run -d --rm --name go-inverter-cli --platform "$PLATFORM" --device="$DEVICE_PATH" \
   "$IMAGE_NAME" -device "$DEVICE_PATH" -interval "$POLLING_INTERVAL" -debug
