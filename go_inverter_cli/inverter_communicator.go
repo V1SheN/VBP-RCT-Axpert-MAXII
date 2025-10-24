@@ -72,7 +72,7 @@ func (ic *InverterCommunicator) SendCommand(command string) (string, error) {
 	flushedBytes := 0 // Add counter
 	for {
 		if time.Since(flushStartTime) > 200*time.Millisecond { // Overall flush timeout
-			fmt.Printf("Communicator: Pre-read flush timeout reached after %dms, %d bytes flushed.\n", time.Since(flushStartTime).Milliseconds(), flushedBytes)
+			// fmt.Printf("Communicator: Pre-read flush timeout reached after %dms, %d bytes flushed.\n", time.Since(flushStartTime).Milliseconds(), flushedBytes)
 			break
 		}
 		_ = ic.deviceFile.SetReadDeadline(time.Now().Add(20 * time.Millisecond)) // Short deadline for each read
@@ -82,16 +82,16 @@ func (ic *InverterCommunicator) SendCommand(command string) (string, error) {
 		if err != nil {
 			// If it's a timeout error, assume buffer is clear
 			if os.IsTimeout(err) {
-				fmt.Printf("	Communicator: Pre-read flush completed (read timeout). %d bytes flushed.\n", flushedBytes)
+				// fmt.Printf("	Communicator: Pre-read flush completed (read timeout). %d bytes flushed.\n", flushedBytes)
 				break
 			}
 			// Other errors, just break
-			fmt.Printf("Communicator: Error during pre-read flush: %v. %d bytes flushed.\n", err, flushedBytes)
+			// fmt.Printf("Communicator: Error during pre-read flush: %v. %d bytes flushed.\n", err, flushedBytes)
 			break
 		}
 		if n == 0 {
 			// No data read, assume buffer is clear
-			fmt.Printf("Communicator: Pre-read flush completed (no data). %d bytes flushed.\n", flushedBytes)
+			// fmt.Printf("Communicator: Pre-read flush completed (no data). %d bytes flushed.\n", flushedBytes)
 			break
 		}
 		flushedBytes += n // Increment counter
@@ -111,7 +111,7 @@ func (ic *InverterCommunicator) SendCommand(command string) (string, error) {
 		return "", fmt.Errorf("error writing command to device: %w", err)
 	}
 
-	fmt.Println("	Communicator: Command sent. Waiting for response...")
+	// fmt.Println("	Communicator: Command sent. Waiting for response...")
 	responseBuffer := make([]byte, bufferSize)
 	var response []byte
 
