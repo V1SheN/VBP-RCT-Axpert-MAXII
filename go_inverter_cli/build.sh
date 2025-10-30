@@ -6,7 +6,7 @@ set -e
 # Define variables
 IMAGE_NAME="go-inverter-cli"
 CONTAINER_NAME="go-inverter-cli"
-DEVICE_PATH="/dev/hidraw5"
+DEVICE_PATH="/dev/hidraw4"
 MQTT_CONFIG_HOST_PATH="./mqtt.json"
 MQTT_CONFIG_CONTAINER_PATH="/app/mqtt.json"
 POLLING_INTERVAL="5s"

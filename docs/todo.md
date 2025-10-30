@@ -65,3 +65,11 @@ This document outlines the tasks required to develop and deploy the Go-based inv
 
 - [x] Make MQTT ClientID dynamic to prevent collisions.
 - [x] Display the JSON string of the data before publishing to MQTT.
+
+## Phase 6: QED Command Implementation
+
+- [ ] Add a new command-line flag to accept the date for the `QEDyyyymmdd` command.
+- [ ] Implement the `QEDyyyymmdd` command in `main.go`.
+- [ ] Add a new struct `QEDData` in `inverter_parser.go` to hold the parsed data.
+- [ ] Add a new function `ParseQEDResponse` in `inverter_parser.go` to parse the response.
+- [ ] Add a new topic to publish the `QED` data to MQTT.

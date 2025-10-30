@@ -156,8 +156,9 @@ func main() {
 				fmt.Println("\nSending QPIGS2 command...")
 				cmdChanQPIGS2 := make(chan CommandResult, 1)
 				go func() {
-					rawResponse, err := communicator.SendCommand("QPIGS2")
-					cmdChanQPIGS2 <- CommandResult{Response: rawResponse, Err: err}
+					// rawResponse, err := communicator.SendCommand("QPIGS2")
+					// cmdChanQPIGS2 <- CommandResult{Response: rawResponse, Err: err}
+					fmt.Println("\n Skipping QPIGS2 command...")
 				}()
 		
 				select {

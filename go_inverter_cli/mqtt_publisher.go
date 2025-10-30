@@ -90,6 +90,6 @@ func (mp *MQTTPublisher) PublishData(data interface{}, subTopic string) error {
 	}
 
 	// fmt.Printf("Published to topic %s: %s", topic, payload)
-	fmt.Printf("Published to topic %s -> ", topic)
+	fmt.Printf("Published to topic -> %s ", topic)
 	return nil
 }
