@@ -65,3 +65,10 @@ This document outlines the tasks required to develop and deploy the Go-based inv
 
 - [x] Make MQTT ClientID dynamic to prevent collisions.
 - [x] Display the JSON string of the data before publishing to MQTT.
+
+## Phase 6: MQTT Command Control
+
+- [ ] Subscribe to an MQTT topic for incoming commands (e.g., `inverter/cmd`).
+- [ ] Implement a message handler to parse incoming JSON command messages.
+- [ ] Implement logic for the `POP` command to set the output source priority.
+- [ ] Publish command execution results to a separate topic (e.g., `inverter/cmd/result`).

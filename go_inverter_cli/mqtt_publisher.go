@@ -18,13 +18,14 @@ type MQTTPublisher struct {
 
 // MQTTConfig holds the configuration for the MQTT connection.
 type MQTTConfig struct {
-	Server     string `json:"server"`
-	Port       string `json:"port"`
-	Topic      string `json:"topic"`
-	DeviceName string `json:"devicename"`
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	ClientID   string `json:"clientid"`	
+	Server       string `json:"server"`
+	Port         string `json:"port"`
+	Topic        string `json:"topic"`
+	CommandTopic string `json:"command_topic"`
+	DeviceName   string `json:"devicename"`
+	Username     string `json:"username"`
+	Password     string `json:"password"`
+	ClientID     string `json:"clientid"`
 }
 
 // NewMQTTPublisher creates a new MQTT publisher instance.
@@ -91,5 +92,18 @@ func (mp *MQTTPublisher) PublishData(data interface{}, subTopic string) error {
 
 	// fmt.Printf("Published to topic %s: %s", topic, payload)
 	fmt.Printf("Published to topic -> %s ", topic)
+	return nil
+}
+
+// Subscribe subscribes to a topic and sets up a message handler.
+func (mp *MQTTPublisher) Subscribe(topic string, handler mqtt.MessageHandler) error {
+	if mp.client == nil || !mp.client.IsConnected() {
+		return fmt.Errorf("not connected to MQTT broker")
+	}
+
+	if token := mp.client.Subscribe(topic, 1, handler); token.Wait() && token.Error() != nil {
+		return fmt.Errorf("failed to subscribe to topic %s: %w", topic, token.Error())
+	}
+	fmt.Printf("Subscribed to topic: %s\n", topic)
 	return nil
 }

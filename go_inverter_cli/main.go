@@ -6,9 +6,56 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
+
+// CommandPayload defines the structure for incoming MQTT commands
+type CommandPayload struct {
+	Command string `json:"command"`
+	Value   string `json:"value"`
+}
+
+func handleMQTTCommand(client mqtt.Client, msg mqtt.Message, communicator *InverterCommunicator, publisher *MQTTPublisher) {
+	fmt.Printf("Received command on topic %s: %s\n", msg.Topic(), string(msg.Payload()))
+
+	var payload CommandPayload
+	if err := json.Unmarshal(msg.Payload(), &payload); err != nil {
+		fmt.Printf("Error unmarshaling command payload: %v\n", err)
+		return
+	}
+
+	var cmd string
+	switch strings.ToLower(payload.Command) {
+	case "pop":
+		switch strings.ToLower(payload.Value) {
+		case "uti":
+			cmd = "POP00"
+		case "sol":
+			cmd = "POP01"
+		case "sbu":
+			cmd = "POP02"
+		default:
+			fmt.Printf("Invalid value for POP command: %s\n", payload.Value)
+			return
+		}
+	default:
+		fmt.Printf("Unknown command: %s\n", payload.Command)
+		return
+	}
+
+	response, err := communicator.SendCommand(cmd)
+	if err != nil {
+		fmt.Printf("Error sending command %s: %v\n", cmd, err)
+		publisher.PublishData(map[string]string{"status": "error", "message": err.Error()}, "cmd/result")
+	} else {
+		fmt.Printf("Successfully sent command %s, response: %s\n", cmd, response)
+		publisher.PublishData(map[string]string{"status": "success", "response": response}, "cmd/result")
+	}
+}
 
 func main() {
 	// Command-line arguments
@@ -73,6 +120,16 @@ func main() {
 		os.Exit(1)
 	}
 	defer publisher.Disconnect()
+
+	// Subscribe to command topic
+	cmdTopic := fmt.Sprintf("%s/%s/cmd", mqttConfig.Topic, mqttConfig.DeviceName)
+	handler := func(client mqtt.Client, msg mqtt.Message) {
+		handleMQTTCommand(client, msg, communicator, publisher)
+	}
+	if err := publisher.Subscribe(cmdTopic, handler); err != nil {
+		fmt.Printf("Failed to subscribe to command topic: %v\n", err)
+		os.Exit(1)
+	}
 
 	// Main polling loop
 	for {
