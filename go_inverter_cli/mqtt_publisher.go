@@ -18,14 +18,15 @@ type MQTTPublisher struct {
 
 // MQTTConfig holds the configuration for the MQTT connection.
 type MQTTConfig struct {
-	Server       string `json:"server"`
-	Port         string `json:"port"`
-	Topic        string `json:"topic"`
-	CommandTopic string `json:"command_topic"`
-	DeviceName   string `json:"devicename"`
-	Username     string `json:"username"`
-	Password     string `json:"password"`
-	ClientID     string `json:"clientid"`
+	Server       string   `json:"server"`
+	Port         string   `json:"port"`
+	Topic        string   `json:"topic"`
+	CommandTopic string   `json:"command_topic"`
+	DeviceName   string   `json:"devicename"`
+	Username     string   `json:"username"`
+	Password     string   `json:"password"`
+	ClientID     string   `json:"clientid"`
+	Devices      []string `json:"devices"`
 }
 
 // NewMQTTPublisher creates a new MQTT publisher instance.

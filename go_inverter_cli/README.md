@@ -20,21 +20,28 @@ The application is configured using the `mqtt.json` file. This file should be pl
     "devicename": "voltronic",
     "username": "<your_mqtt_username>",
     "password": "<your_mqtt_password>",
-    "clientid": "voltronic_cli"
+    "clientid": "voltronic_cli",
+    "devices": ["/dev/hidraw4", "/dev/hidraw5", "/dev/hidraw6", "/dev/hidraw7", "/dev/hidraw8"]
 }
 ```
 
+The application will attempt to open the devices in the `devices` list sequentially. If none are found or work, it will attempt auto-discovery of any `hidraw` device belonging to the `plugdev` group. If no device is found, it will retry every 30 seconds.
+
 ## Usage
 
-1.  **Build the application:**
+1.  **Deploy to Raspberry Pi:**
+    From your development machine, run:
     ```bash
-    go build
+    rsync -avz /home/fish/Software/Development/github/VBP-RCT-Axpert-MAXII/go_inverter_cli/ fish@192.168.31.218:/opt/go_inverter_cli/
     ```
 
-2.  **Run the application:**
+2.  **Build and Run (on Raspberry Pi):**
+    SSH into your Raspberry Pi and run:
     ```bash
-    ./go_inverter_cli
+    cd /opt/go_inverter_cli/ && sudo ./build.sh
     ```
+
+## Local Development (Optional)
 
 ## MQTT Commands
 
@@ -53,12 +60,34 @@ To set the output source priority, use the `pop` command.
     -   `sol`: Solar first (Solar -> Utility -> Battery)
     -   `sbu`: SBU (Solar -> Battery -> Utility)
 
+when POP00 send {"command": "pop", "value": "uti"}
+ when POP01 send {"command": "pop", "value": "sol"}
+when pop02 send {"command": "pop", "value": "sbu"}
 **Example:**
 
 To set the output source priority to SBU, publish the following message to the command topic:
 
 ```bash
 mosquitto_pub -h <your_mqtt_broker_ip> -t "homeassistant/voltronic/cmd" -m '{"command": "pop", "value": "sbu"}'
+```
+
+### Set Charger Source Priority (PCP)
+
+To set the charger source priority, use the `pcp` command.
+
+-   **Command:** `pcp`
+-   **Values:**
+    -   `uti`: Utility first
+    -   `sol`: Solar first
+    -   `soluti`: Solar and Utility
+    -   `onlysol`: Only Solar
+
+**Example:**
+
+To set the charger source priority to Solar and Utility, publish the following message to the command topic:
+
+```bash
+mosquitto_pub -h <your_mqtt_broker_ip> -t "homeassistant/voltronic/cmd" -m '{"command": "pcp", "value": "soluti"}'
 ```
 
 The result of the command will be published to the `homeassistant/voltronic/cmd/result` topic.

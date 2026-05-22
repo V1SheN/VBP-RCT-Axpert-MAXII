@@ -6,7 +6,19 @@ set -e
 # Define variables
 IMAGE_NAME="go-inverter-cli"
 CONTAINER_NAME="go-inverter-cli"
-DEVICE_PATH="/dev/hidraw4"
+
+# Auto-detect DEVICE_PATH by looking for a hidraw device in the 'plugdev' group
+echo "Searching for inverter device..."
+DEVICE_PATH=$(ls -l /dev/hidraw* 2>/dev/null | grep plugdev | awk '{print $NF}' | head -n 1)
+
+if [ -z "$DEVICE_PATH" ]; then
+    echo "Error: No hidraw device with 'plugdev' group found."
+    echo "Please check if the inverter is plugged in and udev rules are applied."
+    exit 1
+fi
+
+echo "--- Detected Inverter Device: $DEVICE_PATH ---"
+
 MQTT_CONFIG_HOST_PATH="./mqtt.json"
 MQTT_CONFIG_CONTAINER_PATH="/app/mqtt.json"
 POLLING_INTERVAL="5s"
@@ -32,5 +44,8 @@ echo "--- Building Docker image: $IMAGE_NAME for platform $PLATFORM ---"
 docker build --platform "$PLATFORM" -t "$IMAGE_NAME" .
 
 echo "--- Running Docker container: $IMAGE_NAME ---"
-docker run -d --rm --name go-inverter-cli --platform "$PLATFORM" --device="$DEVICE_PATH" \
-  "$IMAGE_NAME" -device "$DEVICE_PATH" -interval "$POLLING_INTERVAL" -debug
+# We mount /dev and use --privileged so the container can start even if a specific
+# device is missing. The Go app will then retry and auto-discover the device.
+docker run -d --restart always --name "$CONTAINER_NAME" --platform "$PLATFORM" \
+  -v /dev:/dev --privileged \
+  "$IMAGE_NAME" -interval "$POLLING_INTERVAL" -debug

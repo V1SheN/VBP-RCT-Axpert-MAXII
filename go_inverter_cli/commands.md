@@ -22,9 +22,16 @@ docker build --platform linux/386 -t go-inverter-cli .
 
 ## Run Commands
 
-### Run Docker Container (with device and MQTT config mounted to /app/mqtt.json)
+### Run Docker Container (using the automatic build script)
+The easiest way to run the container is using the provided `build.sh` script, which automatically detects the correct `/dev/hidrawX` device:
 ```bash
-docker run --rm -it --platform linux/386 --device=/dev/hidraw4 -v /home/fish/Software/Development/github/Home-Assistant/docker-voltronic-homeassistant-master/config/mqtt.json:/app/mqtt.json go-inverter-cli -device /dev/hidraw4 -interval 5s
+./build.sh
+```
+
+### Run Docker Container Manually
+If you need to run it manually, replace `/dev/hidrawX` with your actual device path:
+```bash
+docker run --rm -it --platform linux/386 --device=/dev/hidrawX -v $(pwd)/mqtt.json:/app/mqtt.json go-inverter-cli -device /dev/hidrawX -interval 5s
 ```
 
 ## Testing Commands

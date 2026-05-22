@@ -70,5 +70,7 @@ This document outlines the tasks required to develop and deploy the Go-based inv
 
 - [ ] Subscribe to an MQTT topic for incoming commands (e.g., `inverter/cmd`).
 - [ ] Implement a message handler to parse incoming JSON command messages.
-- [ ] Implement logic for the `POP` command to set the output source priority.
+- [x] Implement logic for the `POP` command to set the output source priority via MQTT.
+- [x] Implement automatic switch to Solar Output (POP01) when PV1 Input Voltage > 90.
+- [ ] Implement logic for the `PCP` command to set the charger source priority.
 - [ ] Publish command execution results to a separate topic (e.g., `inverter/cmd/result`).
